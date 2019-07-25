@@ -37,8 +37,9 @@ class CPU:
                     # loaded into memory as base 10
                     # print(int(num, 2))
                     self.ram[address] = int(num, 2)
+                   
                     address += 1
-
+    
         except FileNotFoundError:
             print(f'{sys.argv[0]}: {sys.argv[1]} not found.')
         # program = [
@@ -95,10 +96,12 @@ class CPU:
 
         running = True
         while running:
+            # print(self.PC)
             self.IR = self.PC
+            # print(self.IR)
             operand_a = self.ram_read(self.PC + 1)
             operand_b = self.ram_read(self.PC + 2)
-
+            # print(self.ram)
             if self.ram[self.IR] == HLT:
                 running = False
             elif self.ram[self.IR] == LDI:
@@ -107,3 +110,6 @@ class CPU:
             elif self.ram[self.IR] == PRN:
                 print(self.reg[operand_a])
                 self.PC += 2
+            elif self.ram[self.IR] == MUL:
+                self.alu('MUL', operand_a, operand_b)
+                self.PC += 3
