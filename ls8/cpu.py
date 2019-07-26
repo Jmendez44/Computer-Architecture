@@ -110,7 +110,7 @@ class CPU:
         JEQ = 0b01010101
         JNE = 0b01010110
 
-        self.trace()
+        # self.trace()
 
         running = True
 
@@ -121,7 +121,7 @@ class CPU:
             # print(self.IR)
             operand_a = self.ram_read(self.PC + 1)
             operand_b = self.ram_read(self.PC + 2)
-            print(self.ram_read(self.PC))
+            # print('reg', self.reg[2])
             if self.ram[self.IR] == HLT:
                 running = False
             elif self.ram[self.IR] == LDI:
@@ -137,11 +137,15 @@ class CPU:
                 self.alu('CMP', operand_a, operand_b)
                 self.PC += 3
             elif self.ram[self.IR] == JNE:
-                
-                self.PC += 2
+                if self.equal:
+                    self.PC = self.reg[operand_a]
+                else:
+                    self.PC += 2
             elif self.ram[self.IR] == JEQ:
-                
-                self.PC += 2
+                if self.equal:
+                    self.PC = self.reg[operand_a]
+                else:
+                    self.PC += 2
             elif self.ram[self.IR] == JMP:
+                self.PC = self.reg[operand_a]
                 
-                self.PC += 3
