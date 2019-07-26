@@ -10,6 +10,8 @@ class CPU:
         self.ram = [0]*255
         self.PC = 0x00  # Program Counter
         self.IR = 0X00  # Instruction register
+        self.FL = 0b00000000
+        self.equal = False
 
     def ram_read(self, MAR):  # Memory Address Register
         return self.ram[MAR]
@@ -66,11 +68,12 @@ class CPU:
             self.reg[reg_a] *= self.reg[reg_b]
         elif op == "CMP":
             if self.reg[reg_a] == self.reg[reg_b]:
-                self.fl = 0b00000001
+                self.FL = 0b00000001
+                self.equal = True
             elif self.reg[reg_a] < self.reg[reg_b]:
-                self.fl = 0b00000100
+                self.FL = 0b00000100
             else:
-                self.fl = 0b00000010
+                self.FL = 0b00000010
         #elif op == "SUB": etc
         else:
             raise Exception("Unsupported ALU operation")
@@ -82,18 +85,20 @@ class CPU:
         """
 
         print(f"TRACE: %02X | %02X %02X %02X |" % (
-            self.pc,
-            #self.fl,
+            self.PC,
+            # self.FL,
             #self.ie,
-            self.ram_read(self.pc),
-            self.ram_read(self.pc + 1),
-            self.ram_read(self.pc + 2)
+            self.ram_read(self.PC),
+            self.ram_read(self.PC + 1),
+            self.ram_read(self.PC + 2)
         ), end='')
 
         for i in range(8):
             print(" %02X" % self.reg[i], end='')
 
         print()
+
+
 
     def run(self):
         LDI = 0b10000010
@@ -102,15 +107,21 @@ class CPU:
         MUL = 0b10100010
         CMP = 0b10100111
         JMP = 0b01010100
+        JEQ = 0b01010101
+        JNE = 0b01010110
+
+        self.trace()
 
         running = True
+
         while running:
+            
             # print(self.PC)
             self.IR = self.PC
             # print(self.IR)
             operand_a = self.ram_read(self.PC + 1)
             operand_b = self.ram_read(self.PC + 2)
-            # print(self.ram)
+            print(self.ram_read(self.PC))
             if self.ram[self.IR] == HLT:
                 running = False
             elif self.ram[self.IR] == LDI:
@@ -122,4 +133,15 @@ class CPU:
             elif self.ram[self.IR] == MUL:
                 self.alu('MUL', operand_a, operand_b)
                 self.PC += 3
-            elif 
+            elif self.ram[self.IR] == CMP:
+                self.alu('CMP', operand_a, operand_b)
+                self.PC += 3
+            elif self.ram[self.IR] == JNE:
+                
+                self.PC += 2
+            elif self.ram[self.IR] == JEQ:
+                
+                self.PC += 2
+            elif self.ram[self.IR] == JMP:
+                
+                self.PC += 3
